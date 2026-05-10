@@ -31,6 +31,7 @@ import {
   Phone,
   MessageCircle,
   AlertCircle,
+  CalendarCheck,
 } from "lucide-react";
 
 interface Candidate {
@@ -393,9 +394,20 @@ export default function CandidatesPage() {
                         {c.name[0]}
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-white/80">
-                          {c.name}
-                        </p>
+                        <div className="flex items-center gap-2">
+                          <p className="text-sm font-medium text-white/80">
+                            {c.name}
+                          </p>
+                          {c.interviewDate && (
+                            <div 
+                              className="flex items-center justify-center bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 p-0.5 px-1.5 rounded-md gap-1" 
+                              title={`Interview Scheduled: ${new Date(c.interviewDate).toLocaleDateString()} ${c.interviewTime || ''}`}
+                            >
+                              <CalendarCheck className="w-3 h-3" />
+                              <span className="text-[10px] font-semibold">Scheduled</span>
+                            </div>
+                          )}
+                        </div>
                         <p className="text-xs text-white/30 md:hidden">
                           {c.email}
                         </p>
