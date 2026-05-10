@@ -31,16 +31,16 @@ async function main() {
   });
 
   const candidates = [
-    { name: "Aarav Sharma", email: "aarav.s@gmail.com", phone: "9876543210", status: "NEW", score: 78 },
-    { name: "Priya Patel", email: "priya.p@gmail.com", phone: "9876543211", status: "IN_REVIEW", score: 85 },
-    { name: "Rohan Gupta", email: "rohan.g@gmail.com", phone: "9876543212", status: "INTERVIEW", score: 92 },
-    { name: "Sneha Reddy", email: "sneha.r@gmail.com", phone: "9876543213", status: "HIRED", score: 95 },
-    { name: "Vikram Singh", email: "vikram.s@gmail.com", phone: "9876543214", status: "REJECTED", score: 45 },
-    { name: "Ananya Iyer", email: "ananya.i@gmail.com", phone: "9876543215", status: "NEW", score: 72 },
-    { name: "Karthik Nair", email: "karthik.n@gmail.com", phone: "9876543216", status: "IN_REVIEW", score: 88 },
-    { name: "Meera Joshi", email: "meera.j@gmail.com", phone: "9876543217", status: "INTERVIEW", score: 81 },
-    { name: "Arjun Das", email: "arjun.d@gmail.com", phone: "9876543218", status: "NEW", score: 67 },
-    { name: "Divya Menon", email: "divya.m@gmail.com", phone: "9876543219", status: "IN_REVIEW", score: 90 },
+    { name: "Aarav Sharma", email: "aarav.s@gmail.com", phone: "9876543210", status: "NEW" },
+    { name: "Priya Patel", email: "priya.p@gmail.com", phone: "9876543211", status: "IN_REVIEW" },
+    { name: "Rohan Gupta", email: "rohan.g@gmail.com", phone: "9876543212", status: "INTERVIEW", interviewDate: new Date("2026-05-12"), interviewTime: "10:00" },
+    { name: "Sneha Reddy", email: "sneha.r@gmail.com", phone: "9876543213", status: "HIRED", joiningDate: new Date("2026-05-15") },
+    { name: "Vikram Singh", email: "vikram.s@gmail.com", phone: "9876543214", status: "REJECTED" },
+    { name: "Ananya Iyer", email: "ananya.i@gmail.com", phone: "9876543215", status: "NEW" },
+    { name: "Karthik Nair", email: "karthik.n@gmail.com", phone: "9876543216", status: "IN_REVIEW" },
+    { name: "Meera Joshi", email: "meera.j@gmail.com", phone: "9876543217", status: "INTERVIEW", interviewDate: new Date("2026-05-11"), interviewTime: "14:30" },
+    { name: "Arjun Das", email: "arjun.d@gmail.com", phone: "9876543218", status: "NEW" },
+    { name: "Divya Menon", email: "divya.m@gmail.com", phone: "9876543219", status: "IN_REVIEW" },
   ];
 
   for (const c of candidates) {
