@@ -30,9 +30,16 @@ export async function PATCH(
   const { id } = await params;
   try {
     const body = await req.json();
+    const dataToUpdate: any = { ...body };
+    if (dataToUpdate.interviewDate) dataToUpdate.interviewDate = new Date(dataToUpdate.interviewDate);
+    if (dataToUpdate.joiningDate) dataToUpdate.joiningDate = new Date(dataToUpdate.joiningDate);
+    if (dataToUpdate.interviewDate === "") dataToUpdate.interviewDate = null;
+    if (dataToUpdate.interviewTime === "") dataToUpdate.interviewTime = null;
+    if (dataToUpdate.joiningDate === "") dataToUpdate.joiningDate = null;
+
     const candidate = await prisma.candidate.update({
       where: { id },
-      data: body,
+      data: dataToUpdate,
     });
 
     await pusherServer.trigger(CHANNELS.CANDIDATES, EVENTS.CANDIDATE_UPDATED, candidate);

@@ -57,14 +57,22 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { name, email, phone, status, score } = body;
+    const { name, email, phone, status, interviewDate, interviewTime, joiningDate } = body;
 
     if (!name || !email) {
       return NextResponse.json({ error: "Name and email are required" }, { status: 400 });
     }
 
     const candidate = await prisma.candidate.create({
-      data: { name, email, phone, status, score },
+      data: { 
+        name, 
+        email, 
+        phone, 
+        status, 
+        interviewDate: interviewDate ? new Date(interviewDate) : null,
+        interviewTime: interviewTime || null,
+        joiningDate: joiningDate ? new Date(joiningDate) : null
+      },
     });
 
     // Trigger real-time event for collaboration

@@ -37,7 +37,9 @@ interface Candidate {
   phone?: string;
   status: string;
   source: string;
-  score?: number;
+  interviewDate?: string;
+  interviewTime?: string;
+  joiningDate?: string;
   createdAt: string;
 }
 
@@ -71,7 +73,7 @@ export default function CandidatesPage() {
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingCandidate, setEditingCandidate] = useState<Candidate | null>(null);
-  const [form, setForm] = useState({ name: "", email: "", phone: "", status: "NEW", score: 0 });
+  const [form, setForm] = useState({ name: "", email: "", phone: "", status: "NEW", interviewDate: "", interviewTime: "", joiningDate: "" });
 
   const fetchCandidates = useCallback(async () => {
     try {
@@ -121,7 +123,7 @@ export default function CandidatesPage() {
     if (res.ok) {
       setDialogOpen(false);
       setEditingCandidate(null);
-      setForm({ name: "", email: "", phone: "", status: "NEW", score: 0 });
+      setForm({ name: "", email: "", phone: "", status: "NEW", interviewDate: "", interviewTime: "", joiningDate: "" });
       fetchCandidates();
     }
   };
@@ -139,14 +141,16 @@ export default function CandidatesPage() {
       email: c.email,
       phone: c.phone || "",
       status: c.status,
-      score: c.score || 0,
+      interviewDate: c.interviewDate ? new Date(c.interviewDate).toISOString().split('T')[0] : "",
+      interviewTime: c.interviewTime || "",
+      joiningDate: c.joiningDate ? new Date(c.joiningDate).toISOString().split('T')[0] : "",
     });
     setDialogOpen(true);
   };
 
   const openAdd = () => {
     setEditingCandidate(null);
-    setForm({ name: "", email: "", phone: "", status: "NEW", score: 0 });
+    setForm({ name: "", email: "", phone: "", status: "NEW", interviewDate: "", interviewTime: "", joiningDate: "" });
     setDialogOpen(true);
   };
 
@@ -242,15 +246,31 @@ export default function CandidatesPage() {
                   </select>
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-white/70">Score</Label>
+                  <Label className="text-white/70">Interview Date</Label>
                   <Input
-                    type="number"
-                    min={0}
-                    max={100}
-                    value={form.score}
-                    onChange={(e) =>
-                      setForm({ ...form, score: parseInt(e.target.value) || 0 })
-                    }
+                    type="date"
+                    value={form.interviewDate}
+                    onChange={(e) => setForm({ ...form, interviewDate: e.target.value })}
+                    className="bg-white/5 border-white/10 text-white"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-white/70">Interview Time</Label>
+                  <Input
+                    type="time"
+                    value={form.interviewTime}
+                    onChange={(e) => setForm({ ...form, interviewTime: e.target.value })}
+                    className="bg-white/5 border-white/10 text-white"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label className="text-white/70">Joining Date</Label>
+                  <Input
+                    type="date"
+                    value={form.joiningDate}
+                    onChange={(e) => setForm({ ...form, joiningDate: e.target.value })}
                     className="bg-white/5 border-white/10 text-white"
                   />
                 </div>
@@ -320,7 +340,8 @@ export default function CandidatesPage() {
                 <TableHead className="text-white/40 font-medium hidden md:table-cell">Email</TableHead>
                 <TableHead className="text-white/40 font-medium hidden lg:table-cell">Phone</TableHead>
                 <TableHead className="text-white/40 font-medium">Status</TableHead>
-                <TableHead className="text-white/40 font-medium hidden sm:table-cell">Score</TableHead>
+                <TableHead className="text-white/40 font-medium hidden sm:table-cell">Interview</TableHead>
+                <TableHead className="text-white/40 font-medium hidden sm:table-cell">Joining Date</TableHead>
                 <TableHead className="text-white/40 font-medium text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -360,18 +381,11 @@ export default function CandidatesPage() {
                       {c.status.replace("_", " ")}
                     </span>
                   </TableCell>
-                  <TableCell className="hidden sm:table-cell">
-                    <div className="flex items-center gap-2">
-                      <div className="w-12 h-1.5 rounded-full bg-white/5 overflow-hidden">
-                        <div
-                          className="h-full rounded-full bg-indigo-500"
-                          style={{ width: `${c.score || 0}%` }}
-                        />
-                      </div>
-                      <span className="text-xs text-white/40">
-                        {c.score || 0}
-                      </span>
-                    </div>
+                  <TableCell className="text-white/50 text-sm hidden sm:table-cell">
+                    {c.interviewDate ? `${new Date(c.interviewDate).toLocaleDateString()} ${c.interviewTime || ''}` : "—"}
+                  </TableCell>
+                  <TableCell className="text-white/50 text-sm hidden sm:table-cell">
+                    {c.joiningDate ? new Date(c.joiningDate).toLocaleDateString() : "—"}
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center justify-end gap-1">

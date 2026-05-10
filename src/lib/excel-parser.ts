@@ -9,6 +9,7 @@ export interface ParsedCandidate {
   role?: string;
   interviewDate?: string;
   interviewTime?: string;
+  joiningDate?: string;
 }
 
 export function parseExcelBuffer(buffer: ArrayBuffer): ParsedCandidate[] {
@@ -76,6 +77,7 @@ function parseTrackerFormat(
           source: "Internshala",
           status: "HIRED",
           role: role || undefined,
+          joiningDate: date || undefined,
         });
       }
     }

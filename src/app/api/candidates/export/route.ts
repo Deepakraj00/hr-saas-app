@@ -35,7 +35,9 @@ export async function GET(req: NextRequest) {
       "Email": c.email,
       "Phone": c.phone || "",
       "Status": c.status,
-      "Score": c.score ?? "",
+      "Interview Date": c.interviewDate ? new Date(c.interviewDate).toLocaleDateString() : "",
+      "Interview Time": c.interviewTime || "",
+      "Joining Date": c.joiningDate ? new Date(c.joiningDate).toLocaleDateString() : "",
       "Source": c.source,
       "Interviews": c.interviews.length,
       "Next Interview": c.interviews

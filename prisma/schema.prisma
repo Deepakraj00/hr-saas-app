@@ -26,8 +26,10 @@ model Candidate {
   status      String      @default("NEW")
   resumeUrl   String?
   source      String      @default("Internshala")
-  score       Int?        @default(0)
-  createdAt   DateTime    @default(now())
+  interviewDate DateTime?
+  interviewTime String?
+  joiningDate   DateTime?
+  createdAt     DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
   interviews  Interview[]
 }

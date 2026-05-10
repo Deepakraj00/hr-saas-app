@@ -12,8 +12,8 @@ export async function DELETE(
     if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const currentUser = JSON.parse(session.value);
-    if (currentUser.role !== "ADMIN") {
-      return NextResponse.json({ error: "Forbidden — Admin only" }, { status: 403 });
+    if (currentUser.role !== "ADMIN" && currentUser.role !== "HR") {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     // Prevent deleting yourself

@@ -23,24 +23,27 @@ export async function POST(req: NextRequest) {
     }
 
     // Bulk insert candidates
-    let created = 0;
-    let skipped = 0;
-    for (const c of parsed) {
-      try {
-        await prisma.candidate.create({
-          data: {
-            name: c.name,
-            email: c.email || `${c.name.toLowerCase().replace(/\s+/g, ".")}@imported.local`,
-            phone: c.phone,
-            source: c.source,
-            status: c.status || "NEW",
-          },
-        });
-        created++;
-      } catch {
-        skipped++;
-      }
-    }
+    const dataToInsert = parsed.map(c => ({
+      name: c.name,
+      email: c.email || `${c.name.toLowerCase().replace(/\s+/g, ".")}@imported.local`,
+      phone: c.phone || null,
+      source: c.source,
+      status: c.status || "NEW",
+      interviewDate: c.interviewDate ? new Date(c.interviewDate) : null,
+      interviewTime: c.interviewTime || null,
+      joiningDate: c.joiningDate ? new Date(c.joiningDate) : null,
+    }));
+
+    // Generate unique emails if there are duplicates inside the file itself to avoid createMany failing
+    const uniqueData = Array.from(new Map(dataToInsert.map(item => [item.email, item])).values());
+
+    const result = await prisma.candidate.createMany({
+      data: uniqueData,
+      skipDuplicates: true,
+    });
+    
+    const created = result.count;
+    const skipped = parsed.length - created;
 
     // Trigger real-time refresh
     await pusherServer.trigger(CHANNELS.CANDIDATES, EVENTS.CANDIDATE_ADDED, {

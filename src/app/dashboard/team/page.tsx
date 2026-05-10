@@ -103,13 +103,13 @@ export default function TeamPage() {
     }
   };
 
-  // Only admins can manage team
-  if (user?.role !== "ADMIN") {
+  // Both ADMIN and HR can manage team
+  if (user && user.role !== "ADMIN" && user.role !== "HR") {
     return (
       <div className="flex flex-col items-center justify-center py-20">
         <ShieldAlert className="w-12 h-12 text-red-400/30 mb-4" />
-        <h2 className="text-xl font-bold text-white/60">Admin Access Required</h2>
-        <p className="text-white/30 mt-2">Only admins can manage team members.</p>
+        <h2 className="text-xl font-bold text-white/60">Access Denied</h2>
+        <p className="text-white/30 mt-2">You don't have permission to manage team members.</p>
       </div>
     );
   }

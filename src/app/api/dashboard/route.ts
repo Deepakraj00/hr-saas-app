@@ -3,6 +3,11 @@ import prisma from "@/lib/db";
 
 export async function GET() {
   try {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
     const [
       totalCandidates,
       newCount,
@@ -12,6 +17,8 @@ export async function GET() {
       rejectedCount,
       upcomingInterviews,
       recentCandidates,
+      todaysInterviews,
+      todaysJoinees,
     ] = await Promise.all([
       prisma.candidate.count(),
       prisma.candidate.count({ where: { status: "NEW" } }),
@@ -28,6 +35,19 @@ export async function GET() {
       prisma.candidate.findMany({
         orderBy: { createdAt: "desc" },
         take: 5,
+      }),
+      prisma.candidate.findMany({
+        where: {
+          interviewDate: { gte: today, lt: tomorrow },
+        },
+        select: { id: true, name: true, interviewTime: true, status: true, email: true },
+        orderBy: { interviewTime: "asc" }
+      }),
+      prisma.candidate.findMany({
+        where: {
+          joiningDate: { gte: today, lt: tomorrow },
+        },
+        select: { id: true, name: true, status: true, email: true },
       }),
     ]);
 
@@ -49,6 +69,8 @@ export async function GET() {
         { name: "Rejected", value: rejectedCount, color: "#ef4444" },
       ],
       recentCandidates,
+      todaysInterviews,
+      todaysJoinees,
     });
   } catch {
     return NextResponse.json({ error: "Failed to fetch stats" }, { status: 500 });

@@ -36,6 +36,21 @@ interface RecentCandidate {
   createdAt: string;
 }
 
+interface TodaysInterview {
+  id: string;
+  name: string;
+  email: string;
+  status: string;
+  interviewTime?: string;
+}
+
+interface TodaysJoinee {
+  id: string;
+  name: string;
+  email: string;
+  status: string;
+}
+
 const statusColors: Record<string, string> = {
   NEW: "bg-indigo-500/20 text-indigo-400",
   IN_REVIEW: "bg-amber-500/20 text-amber-400",
@@ -48,6 +63,8 @@ export default function DashboardPage() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [pipeline, setPipeline] = useState<PipelineItem[]>([]);
   const [recentCandidates, setRecentCandidates] = useState<RecentCandidate[]>([]);
+  const [todaysInterviews, setTodaysInterviews] = useState<TodaysInterview[]>([]);
+  const [todaysJoinees, setTodaysJoinees] = useState<TodaysJoinee[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchData = useCallback(async () => {
@@ -58,6 +75,8 @@ export default function DashboardPage() {
         setStats(data.stats);
         setPipeline(data.pipeline);
         setRecentCandidates(data.recentCandidates);
+        setTodaysInterviews(data.todaysInterviews || []);
+        setTodaysJoinees(data.todaysJoinees || []);
       }
     } catch (err) {
       console.error("Failed to fetch dashboard:", err);
@@ -156,10 +175,10 @@ export default function DashboardPage() {
         ))}
       </div>
 
-      {/* Pipeline & Recent */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+      {/* Pipeline & Lists */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Pipeline Chart */}
-        <Card className="lg:col-span-3 border-white/5 bg-white/[0.02] backdrop-blur">
+        <Card className="lg:col-span-1 border-white/5 bg-white/[0.02] backdrop-blur">
           <CardHeader>
             <CardTitle className="text-white flex items-center gap-2">
               <TrendingUp className="w-5 h-5 text-indigo-400" />
@@ -188,40 +207,53 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
-        {/* Recent Candidates */}
-        <Card className="lg:col-span-2 border-white/5 bg-white/[0.02] backdrop-blur">
+        {/* Today's Interviews */}
+        <Card className="lg:col-span-1 border-white/5 bg-white/[0.02] backdrop-blur">
           <CardHeader>
             <CardTitle className="text-white flex items-center gap-2">
-              <Clock className="w-5 h-5 text-purple-400" />
-              Recent Candidates
+              <Calendar className="w-5 h-5 text-blue-400" />
+              Today's Interviews
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            {recentCandidates.length === 0 ? (
-              <p className="text-white/30 text-sm text-center py-4">
-                No candidates yet
-              </p>
+            {todaysInterviews.length === 0 ? (
+              <p className="text-white/30 text-sm text-center py-4">No interviews today</p>
             ) : (
-              recentCandidates.map((c) => (
-                <div
-                  key={c.id}
-                  className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.03] hover:bg-white/[0.06] transition-colors"
-                >
-                  <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
-                    {c.name[0]}
-                  </div>
+              todaysInterviews.map((c) => (
+                <div key={c.id} className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.03] hover:bg-white/[0.06] transition-colors">
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-white/80 truncate">
-                      {c.name}
-                    </p>
-                    <p className="text-xs text-white/30 truncate">{c.email}</p>
+                    <p className="text-sm font-medium text-white/80 truncate">{c.name}</p>
+                    <p className="text-xs text-white/40 truncate">{c.email}</p>
                   </div>
-                  <span
-                    className={`text-[10px] font-semibold px-2 py-1 rounded-md ${
-                      statusColors[c.status] || "bg-white/10 text-white/50"
-                    }`}
-                  >
-                    {c.status.replace("_", " ")}
+                  <span className="text-xs font-semibold text-blue-400 bg-blue-500/10 px-2 py-1 rounded-md">
+                    {c.interviewTime || "TBA"}
+                  </span>
+                </div>
+              ))
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Today's Joinees */}
+        <Card className="lg:col-span-1 border-white/5 bg-white/[0.02] backdrop-blur">
+          <CardHeader>
+            <CardTitle className="text-white flex items-center gap-2">
+              <UserCheck className="w-5 h-5 text-emerald-400" />
+              Today's Joinees
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {todaysJoinees.length === 0 ? (
+              <p className="text-white/30 text-sm text-center py-4">No joinees today</p>
+            ) : (
+              todaysJoinees.map((c) => (
+                <div key={c.id} className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.03] hover:bg-white/[0.06] transition-colors">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-white/80 truncate">{c.name}</p>
+                    <p className="text-xs text-white/40 truncate">{c.email}</p>
+                  </div>
+                  <span className="text-xs font-semibold text-emerald-400 bg-emerald-500/10 px-2 py-1 rounded-md">
+                    Joining
                   </span>
                 </div>
               ))
