@@ -86,8 +86,8 @@ export default function CandidatesPage() {
   const fetchCandidates = useCallback(async () => {
     try {
       const params = new URLSearchParams({
-        page: pagination.page.toString(),
-        limit: "10",
+        page: "1",
+        limit: "1000",
         search,
         status: statusFilter,
       });
@@ -359,7 +359,7 @@ export default function CandidatesPage() {
       </div>
 
       {/* Table */}
-      <div className="rounded-2xl border border-white/5 bg-white/[0.02] overflow-hidden">
+      <div className="rounded-2xl border border-white/5 bg-white/[0.02] max-h-[70vh] overflow-y-auto relative">
         {loading ? (
           <div className="p-8 text-center">
             <div className="animate-spin h-6 w-6 border-2 border-indigo-500 border-t-transparent rounded-full mx-auto" />
@@ -370,8 +370,8 @@ export default function CandidatesPage() {
           </div>
         ) : (
           <Table>
-            <TableHeader>
-              <TableRow className="border-white/5 hover:bg-transparent">
+            <TableHeader className="sticky top-0 bg-[#12121a]/95 backdrop-blur z-10 shadow-sm border-b border-white/5">
+              <TableRow className="border-none hover:bg-transparent">
                 <TableHead className="text-white/40 font-medium">Name</TableHead>
                 <TableHead className="text-white/40 font-medium hidden md:table-cell">Email</TableHead>
                 <TableHead className="text-white/40 font-medium hidden lg:table-cell">Phone</TableHead>
@@ -490,40 +490,6 @@ export default function CandidatesPage() {
           </Table>
         )}
       </div>
-
-      {/* Pagination */}
-      {pagination.pages > 1 && (
-        <div className="flex items-center justify-between">
-          <p className="text-sm text-white/30">
-            Page {pagination.page} of {pagination.pages}
-          </p>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={pagination.page <= 1}
-              onClick={() =>
-                setPagination((p) => ({ ...p, page: p.page - 1 }))
-              }
-              className="border-white/10 text-white/50 hover:text-white hover:bg-white/5"
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={pagination.page >= pagination.pages}
-              onClick={() =>
-                setPagination((p) => ({ ...p, page: p.page + 1 }))
-              }
-              className="border-white/10 text-white/50 hover:text-white hover:bg-white/5"
-            >
-              <ChevronRight className="w-4 h-4" />
-            </Button>
-          </div>
-        </div>
-      )}
-
       {/* Delete Confirmation Dialog */}
       <Dialog open={!!deleteConfirmId} onOpenChange={(open) => !open && setDeleteConfirmId(null)}>
         <DialogContent className="bg-[#12121a] border-white/10 text-white max-w-sm">
