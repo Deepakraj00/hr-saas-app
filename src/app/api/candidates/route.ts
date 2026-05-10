@@ -18,9 +18,10 @@ export async function GET(req: NextRequest) {
 
     if (search) {
       where.OR = [
-        { name: { contains: search } },
-        { email: { contains: search } },
-        { phone: { contains: search } },
+        { name: { contains: search, mode: 'insensitive' } },
+        { email: { contains: search, mode: 'insensitive' } },
+        { phone: { contains: search, mode: 'insensitive' } },
+        { role: { contains: search, mode: 'insensitive' } },
       ];
     }
 
@@ -57,7 +58,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { name, email, phone, status, interviewDate, interviewTime, joiningDate } = body;
+    const { name, email, phone, role, status, interviewDate, interviewTime, joiningDate } = body;
 
     if (!name || !email) {
       return NextResponse.json({ error: "Name and email are required" }, { status: 400 });
@@ -68,6 +69,7 @@ export async function POST(req: NextRequest) {
         name, 
         email, 
         phone, 
+        role,
         status, 
         interviewDate: interviewDate ? new Date(interviewDate) : null,
         interviewTime: interviewTime || null,

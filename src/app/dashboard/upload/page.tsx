@@ -7,6 +7,7 @@ import { Upload, FileSpreadsheet, CheckCircle, AlertCircle, X } from "lucide-rea
 
 export default function UploadPage() {
   const [file, setFile] = useState<File | null>(null);
+  const [role, setRole] = useState("");
   const [dragging, setDragging] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [result, setResult] = useState<{
@@ -48,6 +49,9 @@ export default function UploadPage() {
     try {
       const formData = new FormData();
       formData.append("file", file);
+      if (role) {
+        formData.append("role", role);
+      }
 
       const res = await fetch("/api/upload", {
         method: "POST",
@@ -88,6 +92,19 @@ export default function UploadPage() {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
+          {/* Role Input */}
+          <div className="space-y-2">
+            <label className="text-white/70 text-sm font-medium">Role (Optional)</label>
+            <input
+              type="text"
+              value={role}
+              onChange={(e) => setRole(e.target.value)}
+              placeholder="e.g. Web Developer, Video Editor..."
+              className="w-full px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+            />
+            <p className="text-white/30 text-xs">If provided, all candidates in this file will be assigned this role.</p>
+          </div>
+
           {/* Drop zone */}
           <div
             onDragOver={(e) => {

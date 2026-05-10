@@ -7,6 +7,7 @@ export async function POST(req: NextRequest) {
   try {
     const formData = await req.formData();
     const file = formData.get("file") as File;
+    const roleInput = formData.get("role") as string || null;
 
     if (!file) {
       return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
@@ -29,6 +30,7 @@ export async function POST(req: NextRequest) {
       phone: c.phone || null,
       source: c.source,
       status: c.status || "NEW",
+      role: c.role || roleInput,
       interviewDate: c.interviewDate ? new Date(c.interviewDate) : null,
       interviewTime: c.interviewTime || null,
       joiningDate: c.joiningDate ? new Date(c.joiningDate) : null,

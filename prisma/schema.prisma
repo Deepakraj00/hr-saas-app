@@ -24,6 +24,7 @@ model Candidate {
   email       String      @unique
   phone       String?
   status      String      @default("NEW")
+  role        String?
   resumeUrl   String?
   source      String      @default("Internshala")
   interviewDate DateTime?

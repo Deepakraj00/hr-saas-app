@@ -30,6 +30,7 @@ import {
   Download,
   Phone,
   MessageCircle,
+  AlertCircle,
 } from "lucide-react";
 
 interface Candidate {
@@ -37,6 +38,7 @@ interface Candidate {
   name: string;
   email: string;
   phone?: string;
+  role?: string;
   status: string;
   source: string;
   interviewDate?: string;
@@ -74,8 +76,9 @@ export default function CandidatesPage() {
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [editingCandidate, setEditingCandidate] = useState<Candidate | null>(null);
-  const [form, setForm] = useState({ name: "", email: "", phone: "", status: "NEW", interviewDate: "", interviewTime: "", joiningDate: "" });
+  const [form, setForm] = useState({ name: "", email: "", phone: "", role: "", status: "NEW", interviewDate: "", interviewTime: "", joiningDate: "" });
 
   const fetchCandidates = useCallback(async () => {
     try {
@@ -125,15 +128,16 @@ export default function CandidatesPage() {
     if (res.ok) {
       setDialogOpen(false);
       setEditingCandidate(null);
-      setForm({ name: "", email: "", phone: "", status: "NEW", interviewDate: "", interviewTime: "", joiningDate: "" });
+      setForm({ name: "", email: "", phone: "", role: "", status: "NEW", interviewDate: "", interviewTime: "", joiningDate: "" });
       fetchCandidates();
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this candidate?")) return;
-    const res = await fetch(`/api/candidates/${id}`, { method: "DELETE" });
+  const confirmDelete = async () => {
+    if (!deleteConfirmId) return;
+    const res = await fetch(`/api/candidates/${deleteConfirmId}`, { method: "DELETE" });
     if (res.ok) fetchCandidates();
+    setDeleteConfirmId(null);
   };
 
   const openEdit = (c: Candidate) => {
@@ -142,6 +146,7 @@ export default function CandidatesPage() {
       name: c.name,
       email: c.email,
       phone: c.phone || "",
+      role: c.role || "",
       status: c.status,
       interviewDate: c.interviewDate ? new Date(c.interviewDate).toISOString().split('T')[0] : "",
       interviewTime: c.interviewTime || "",
@@ -152,7 +157,7 @@ export default function CandidatesPage() {
 
   const openAdd = () => {
     setEditingCandidate(null);
-    setForm({ name: "", email: "", phone: "", status: "NEW", interviewDate: "", interviewTime: "", joiningDate: "" });
+    setForm({ name: "", email: "", phone: "", role: "", status: "NEW", interviewDate: "", interviewTime: "", joiningDate: "" });
     setDialogOpen(true);
   };
 
@@ -223,14 +228,25 @@ export default function CandidatesPage() {
                   placeholder="email@example.com"
                 />
               </div>
-              <div className="space-y-2">
-                <Label className="text-white/70">Phone</Label>
-                <Input
-                  value={form.phone}
-                  onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                  className="bg-white/5 border-white/10 text-white"
-                  placeholder="Phone number"
-                />
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label className="text-white/70">Phone</Label>
+                  <Input
+                    value={form.phone}
+                    onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                    className="bg-white/5 border-white/10 text-white"
+                    placeholder="Phone number"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-white/70">Role</Label>
+                  <Input
+                    value={form.role}
+                    onChange={(e) => setForm({ ...form, role: e.target.value })}
+                    className="bg-white/5 border-white/10 text-white"
+                    placeholder="e.g. Web Developer"
+                  />
+                </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
@@ -294,7 +310,7 @@ export default function CandidatesPage() {
         <div className="relative flex-1 max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
           <Input
-            placeholder="Search by name, email, or phone..."
+            placeholder="Search by name, email, phone, or role..."
             value={search}
             onChange={(e) => {
               setSearch(e.target.value);
@@ -341,6 +357,7 @@ export default function CandidatesPage() {
                 <TableHead className="text-white/40 font-medium">Name</TableHead>
                 <TableHead className="text-white/40 font-medium hidden md:table-cell">Email</TableHead>
                 <TableHead className="text-white/40 font-medium hidden lg:table-cell">Phone</TableHead>
+                <TableHead className="text-white/40 font-medium">Role</TableHead>
                 <TableHead className="text-white/40 font-medium">Status</TableHead>
                 <TableHead className="text-white/40 font-medium hidden sm:table-cell">Interview</TableHead>
                 <TableHead className="text-white/40 font-medium hidden sm:table-cell">Joining Date</TableHead>
@@ -383,6 +400,9 @@ export default function CandidatesPage() {
                     ) : (
                       <span className="text-white/50 text-sm">—</span>
                     )}
+                  </TableCell>
+                  <TableCell className="text-white/70 text-sm">
+                    {c.role || "—"}
                   </TableCell>
                   <TableCell>
                     <span
@@ -430,7 +450,7 @@ export default function CandidatesPage() {
                         <Edit className="w-4 h-4" />
                       </button>
                       <button
-                        onClick={() => handleDelete(c.id)}
+                        onClick={() => setDeleteConfirmId(c.id)}
                         className="p-2 rounded-lg text-white/30 hover:text-red-400 hover:bg-red-500/10 transition-colors"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -476,6 +496,38 @@ export default function CandidatesPage() {
           </div>
         </div>
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={!!deleteConfirmId} onOpenChange={(open) => !open && setDeleteConfirmId(null)}>
+        <DialogContent className="bg-[#12121a] border-white/10 text-white max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="text-red-400 flex items-center gap-2">
+              <AlertCircle className="w-5 h-5" />
+              Delete Candidate
+            </DialogTitle>
+          </DialogHeader>
+          <div className="pt-4">
+            <p className="text-white/70 text-sm">
+              Are you sure you want to delete this candidate? This action cannot be undone.
+            </p>
+            <div className="flex items-center justify-end gap-3 mt-6">
+              <Button
+                variant="outline"
+                onClick={() => setDeleteConfirmId(null)}
+                className="border-white/10 text-white hover:bg-white/5 hover:text-white"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={confirmDelete}
+                className="bg-red-500/20 text-red-400 hover:bg-red-500/30 border border-red-500/30"
+              >
+                Delete
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
