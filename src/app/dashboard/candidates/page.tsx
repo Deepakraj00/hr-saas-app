@@ -28,6 +28,8 @@ import {
   Edit,
   Filter,
   Download,
+  Phone,
+  MessageCircle,
 } from "lucide-react";
 
 interface Candidate {
@@ -369,8 +371,18 @@ export default function CandidatesPage() {
                   <TableCell className="text-white/50 text-sm hidden md:table-cell">
                     {c.email}
                   </TableCell>
-                  <TableCell className="text-white/50 text-sm hidden lg:table-cell">
-                    {c.phone || "—"}
+                  <TableCell className="hidden lg:table-cell">
+                    {c.phone ? (
+                      <a
+                        href={`tel:${c.phone}`}
+                        className="inline-flex items-center gap-1.5 text-sm text-white/50 hover:text-emerald-400 transition-colors group"
+                      >
+                        <Phone className="w-3.5 h-3.5 text-emerald-500/50 group-hover:text-emerald-400 transition-colors" />
+                        {c.phone}
+                      </a>
+                    ) : (
+                      <span className="text-white/50 text-sm">—</span>
+                    )}
                   </TableCell>
                   <TableCell>
                     <span
@@ -389,6 +401,26 @@ export default function CandidatesPage() {
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center justify-end gap-1">
+                      {c.phone && (
+                        <>
+                          <a
+                            href={`tel:${c.phone}`}
+                            className="p-2 rounded-lg text-white/30 hover:text-emerald-400 hover:bg-emerald-500/10 transition-colors"
+                            title={`Call ${c.name}`}
+                          >
+                            <Phone className="w-4 h-4" />
+                          </a>
+                          <a
+                            href={`https://wa.me/${c.phone.replace(/[^0-9]/g, '')}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="p-2 rounded-lg text-white/30 hover:text-green-400 hover:bg-green-500/10 transition-colors"
+                            title={`WhatsApp ${c.name}`}
+                          >
+                            <MessageCircle className="w-4 h-4" />
+                          </a>
+                        </>
+                      )}
                       <button
                         onClick={() => openEdit(c)}
                         className="p-2 rounded-lg text-white/30 hover:text-indigo-400 hover:bg-indigo-500/10 transition-colors"
