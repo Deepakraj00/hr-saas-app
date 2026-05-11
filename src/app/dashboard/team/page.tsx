@@ -359,13 +359,15 @@ export default function TeamPage() {
                           >
                             <Edit className="w-4 h-4" />
                           </button>
-                          <button
-                            onClick={() => handleDelete(u.id, u.name)}
-                            className="p-2 rounded-lg text-white/30 hover:text-red-400 hover:bg-red-500/10 transition-colors"
-                            title="Remove from team"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
+                          {user?.role === "ADMIN" && (
+                            <button
+                              onClick={() => handleDelete(u.id, u.name)}
+                              className="p-2 rounded-lg text-white/30 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+                              title="Remove from team"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          )}
                         </>
                       ) : (
                         <span className="text-xs text-white/20 px-2 py-1">You</span>
