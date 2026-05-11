@@ -20,7 +20,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { UserPlus, Trash2, Shield, User, ShieldAlert } from "lucide-react";
+import { UserPlus, Trash2, Shield, User, ShieldAlert, Edit } from "lucide-react";
 
 interface TeamUser {
   id: string;
@@ -36,6 +36,9 @@ export default function TeamPage() {
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [form, setForm] = useState({ name: "", email: "", password: "", role: "HR" });
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState<TeamUser | null>(null);
+  const [editForm, setEditForm] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
@@ -100,6 +103,40 @@ export default function TeamPage() {
     } else {
       const data = await res.json();
       alert(data.error || "Failed to delete user");
+    }
+  };
+
+  const handleUpdate = async () => {
+    setError("");
+    setSuccess("");
+
+    if (!editForm.email && !editForm.password) {
+      setError("Please provide an email or password to update");
+      return;
+    }
+
+    if (editForm.password && editForm.password.length < 4) {
+      setError("Password must be at least 4 characters");
+      return;
+    }
+
+    const res = await fetch(`/api/users/${editingUser?.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(editForm),
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
+      setEditDialogOpen(false);
+      setEditingUser(null);
+      setEditForm({ email: "", password: "" });
+      setSuccess(`User credentials updated successfully!`);
+      fetchUsers();
+      setTimeout(() => setSuccess(""), 3000);
+    } else {
+      setError(data.error || "Failed to update user");
     }
   };
 
@@ -190,6 +227,47 @@ export default function TeamPage() {
             </div>
           </DialogContent>
         </Dialog>
+        
+        <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+          <DialogContent className="bg-[#12121a] border-white/10 text-white max-w-md">
+            <DialogHeader>
+              <DialogTitle>Edit Login Credentials</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 pt-4">
+              {error && (
+                <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
+                  {error}
+                </div>
+              )}
+              <div className="space-y-2">
+                <Label className="text-white/70">New Email (Optional)</Label>
+                <Input
+                  type="email"
+                  value={editForm.email}
+                  onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+                  className="bg-white/5 border-white/10 text-white"
+                  placeholder="Leave blank to keep current"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-white/70">New Password (Optional)</Label>
+                <Input
+                  type="password"
+                  value={editForm.password}
+                  onChange={(e) => setEditForm({ ...editForm, password: e.target.value })}
+                  className="bg-white/5 border-white/10 text-white"
+                  placeholder="Leave blank to keep current"
+                />
+              </div>
+              <Button
+                onClick={handleUpdate}
+                className="w-full bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white"
+              >
+                Update Credentials
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
 
       {/* Success message */}
@@ -268,13 +346,27 @@ export default function TeamPage() {
                   <TableCell>
                     <div className="flex justify-end">
                       {u.id !== user?.id ? (
-                        <button
-                          onClick={() => handleDelete(u.id, u.name)}
-                          className="p-2 rounded-lg text-white/30 hover:text-red-400 hover:bg-red-500/10 transition-colors"
-                          title="Remove from team"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
+                        <>
+                          <button
+                            onClick={() => {
+                              setEditingUser(u);
+                              setEditForm({ email: u.email, password: "" });
+                              setEditDialogOpen(true);
+                              setError("");
+                            }}
+                            className="p-2 rounded-lg text-white/30 hover:text-amber-400 hover:bg-amber-500/10 transition-colors"
+                            title="Edit Credentials"
+                          >
+                            <Edit className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(u.id, u.name)}
+                            className="p-2 rounded-lg text-white/30 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+                            title="Remove from team"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </>
                       ) : (
                         <span className="text-xs text-white/20 px-2 py-1">You</span>
                       )}
