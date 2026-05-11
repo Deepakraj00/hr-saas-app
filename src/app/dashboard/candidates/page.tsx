@@ -152,6 +152,7 @@ export default function CandidatesPage() {
     } else {
       defaultMsg += `your interview is scheduled. `;
     }
+    defaultMsg += `\n\nLocation: Almidm\nMap: https://www.google.com/search?kgmid=%2Fg%2F11t1ld_43p&hl=en-IN&q=Almidm&shem=rimspwouoe&shndl=30&source=sh%2Fx%2Floc%2Fosrp%2Fm1%2F2&kgs=4251e17c886eb10a\n\n`;
     defaultMsg += `Please let us know if you have any questions!`;
     
     setWhatsappCandidate(c);
