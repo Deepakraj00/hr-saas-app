@@ -140,8 +140,8 @@ export default function TeamPage() {
     }
   };
 
-  // Both ADMIN and HR can manage team
-  if (user && user.role !== "ADMIN" && user.role !== "HR") {
+  // Only ADMIN and HR_MANAGER can manage team
+  if (user && user.role !== "ADMIN" && user.role !== "HR_MANAGER") {
     return (
       <div className="flex flex-col items-center justify-center py-20">
         <ShieldAlert className="w-12 h-12 text-red-400/30 mb-4" />
@@ -214,7 +214,8 @@ export default function TeamPage() {
                   onChange={(e) => setForm({ ...form, role: e.target.value })}
                   className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
                 >
-                  <option value="HR" className="bg-[#12121a]">HR</option>
+                  <option value="HR" className="bg-[#12121a]">HR Staff</option>
+                  <option value="HR_MANAGER" className="bg-[#12121a]">HR Manager</option>
                   <option value="ADMIN" className="bg-[#12121a]">Admin</option>
                 </select>
               </div>
@@ -325,15 +326,19 @@ export default function TeamPage() {
                       className={`inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-md border ${
                         u.role === "ADMIN"
                           ? "bg-amber-500/15 text-amber-400 border-amber-500/20"
+                          : u.role === "HR_MANAGER"
+                          ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/20"
                           : "bg-indigo-500/15 text-indigo-400 border-indigo-500/20"
                       }`}
                     >
                       {u.role === "ADMIN" ? (
                         <Shield className="w-3 h-3" />
+                      ) : u.role === "HR_MANAGER" ? (
+                        <ShieldAlert className="w-3 h-3" />
                       ) : (
                         <User className="w-3 h-3" />
                       )}
-                      {u.role}
+                      {u.role === "HR_MANAGER" ? "HR MANAGER" : u.role === "HR" ? "HR STAFF" : u.role}
                     </span>
                   </TableCell>
                   <TableCell className="text-white/40 text-sm hidden md:table-cell">

@@ -13,7 +13,7 @@ export async function GET(req: NextRequest) {
     if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const user = JSON.parse(session.value);
-    if (user.role !== "ADMIN" && user.role !== "HR") {
+    if (user.role !== "ADMIN" && user.role !== "HR_MANAGER") {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
     if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const currentUser = JSON.parse(session.value);
-    if (currentUser.role !== "ADMIN" && currentUser.role !== "HR") {
+    if (currentUser.role !== "ADMIN" && currentUser.role !== "HR_MANAGER") {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
