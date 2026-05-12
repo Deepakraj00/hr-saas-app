@@ -82,6 +82,7 @@ export default function CandidatesPage() {
   const [whatsappMessage, setWhatsappMessage] = useState("");
   const [editingCandidate, setEditingCandidate] = useState<Candidate | null>(null);
   const [form, setForm] = useState({ name: "", email: "", phone: "", role: "", status: "NEW", interviewDate: "", interviewTime: "", joiningDate: "" });
+  const [error, setError] = useState("");
 
   const fetchCandidates = useCallback(async () => {
     try {
@@ -117,6 +118,7 @@ export default function CandidatesPage() {
   }, [fetchCandidates]);
 
   const handleSave = async () => {
+    setError("");
     const method = editingCandidate ? "PATCH" : "POST";
     const url = editingCandidate
       ? `/api/candidates/${editingCandidate.id}`
@@ -133,6 +135,9 @@ export default function CandidatesPage() {
       setEditingCandidate(null);
       setForm({ name: "", email: "", phone: "", role: "", status: "NEW", interviewDate: "", interviewTime: "", joiningDate: "" });
       fetchCandidates();
+    } else {
+      const data = await res.json().catch(() => ({}));
+      setError(data.error || "Failed to save candidate. Check if email already exists.");
     }
   };
 
@@ -160,6 +165,7 @@ export default function CandidatesPage() {
   };
 
   const openEdit = (c: Candidate) => {
+    setError("");
     setEditingCandidate(c);
     setForm({
       name: c.name,
@@ -175,6 +181,7 @@ export default function CandidatesPage() {
   };
 
   const openAdd = () => {
+    setError("");
     setEditingCandidate(null);
     setForm({ name: "", email: "", phone: "", role: "", status: "NEW", interviewDate: "", interviewTime: "", joiningDate: "" });
     setDialogOpen(true);
@@ -229,6 +236,11 @@ export default function CandidatesPage() {
               </DialogTitle>
             </DialogHeader>
             <div className="space-y-4 pt-4">
+              {error && (
+                <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
+                  {error}
+                </div>
+              )}
               <div className="space-y-2">
                 <Label className="text-white/70">Name</Label>
                 <Input
