@@ -78,6 +78,8 @@ export default function CandidatesPage() {
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
   const [whatsappCandidate, setWhatsappCandidate] = useState<Candidate | null>(null);
   const [whatsappMessage, setWhatsappMessage] = useState("");
   const [editingCandidate, setEditingCandidate] = useState<Candidate | null>(null);
@@ -106,7 +108,10 @@ export default function CandidatesPage() {
   }, [pagination.page, search, statusFilter]);
 
   useEffect(() => {
-    setLoading(true);
+    // Only show full-page loading for the initial load
+    if (candidates.length === 0) {
+      setLoading(true);
+    }
     const debounce = setTimeout(() => fetchCandidates(), 300);
     return () => clearTimeout(debounce);
   }, [fetchCandidates]);
@@ -144,8 +149,38 @@ export default function CandidatesPage() {
   const confirmDelete = async () => {
     if (!deleteConfirmId) return;
     const res = await fetch(`/api/candidates/${deleteConfirmId}`, { method: "DELETE" });
-    if (res.ok) fetchCandidates();
+    if (res.ok) {
+      fetchCandidates();
+      setSelectedIds(prev => prev.filter(id => id !== deleteConfirmId));
+    }
     setDeleteConfirmId(null);
+  };
+
+  const toggleSelection = (id: string) => {
+    setSelectedIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
+  };
+
+  const toggleAll = () => {
+    if (candidates.length === 0) return;
+    if (selectedIds.length === candidates.length) {
+      setSelectedIds([]);
+    } else {
+      setSelectedIds(candidates.map(c => c.id));
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedIds.length === 0) return;
+    const res = await fetch("/api/candidates/bulk-delete", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ids: selectedIds }),
+    });
+    if (res.ok) {
+      setSelectedIds([]);
+      setBulkDeleteOpen(false);
+      fetchCandidates();
+    }
   };
 
   const openWhatsAppModal = (c: Candidate) => {
@@ -219,6 +254,16 @@ export default function CandidatesPage() {
             <Download className="w-4 h-4 mr-2" />
             Export Excel
           </Button>
+          {selectedIds.length > 0 && (
+            <Button
+              onClick={() => setBulkDeleteOpen(true)}
+              variant="outline"
+              className="border-red-500/30 text-red-400 hover:bg-red-500/10 hover:text-red-300"
+            >
+              <Trash2 className="w-4 h-4 mr-2" />
+              Delete Selected ({selectedIds.length})
+            </Button>
+          )}
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
               <Button
@@ -373,9 +418,14 @@ export default function CandidatesPage() {
 
       {/* Table */}
       <div className="rounded-2xl border border-white/5 bg-white/[0.02] max-h-[70vh] overflow-y-auto relative">
-        {loading ? (
-          <div className="p-8 text-center">
-            <div className="animate-spin h-6 w-6 border-2 border-indigo-500 border-t-transparent rounded-full mx-auto" />
+        {loading && candidates.length === 0 ? (
+          <div className="p-8 space-y-4">
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className="flex gap-4 items-center">
+                <div className="h-10 w-10 rounded-lg bg-white/5 animate-pulse" />
+                <div className="h-4 flex-1 bg-white/5 animate-pulse rounded" />
+              </div>
+            ))}
           </div>
         ) : candidates.length === 0 ? (
           <div className="p-12 text-center">
@@ -385,6 +435,14 @@ export default function CandidatesPage() {
           <Table>
             <TableHeader className="sticky top-0 bg-[#12121a]/95 backdrop-blur z-10 shadow-sm border-b border-white/5">
               <TableRow className="border-none hover:bg-transparent">
+                <TableHead className="w-[40px] px-4">
+                  <input
+                    type="checkbox"
+                    className="w-4 h-4 rounded border-white/20 bg-white/5 accent-indigo-500 cursor-pointer"
+                    checked={candidates.length > 0 && selectedIds.length === candidates.length}
+                    onChange={toggleAll}
+                  />
+                </TableHead>
                 <TableHead className="text-white/40 font-medium">Name</TableHead>
                 <TableHead className="text-white/40 font-medium hidden md:table-cell">Email</TableHead>
                 <TableHead className="text-white/40 font-medium hidden lg:table-cell">Phone</TableHead>
@@ -399,8 +457,18 @@ export default function CandidatesPage() {
               {candidates.map((c) => (
                 <TableRow
                   key={c.id}
-                  className="border-white/5 hover:bg-white/[0.03] transition-colors"
+                  className={`border-white/5 transition-colors ${
+                    selectedIds.includes(c.id) ? "bg-indigo-500/10 hover:bg-indigo-500/20" : "hover:bg-white/[0.03]"
+                  }`}
                 >
+                  <TableCell className="px-4">
+                    <input
+                      type="checkbox"
+                      className="w-4 h-4 rounded border-white/20 bg-white/5 accent-indigo-500 cursor-pointer"
+                      checked={selectedIds.includes(c.id)}
+                      onChange={() => toggleSelection(c.id)}
+                    />
+                  </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
@@ -529,6 +597,38 @@ export default function CandidatesPage() {
                 className="bg-red-500/20 text-red-400 hover:bg-red-500/30 border border-red-500/30"
               >
                 Delete
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Bulk Delete Confirmation Dialog */}
+      <Dialog open={bulkDeleteOpen} onOpenChange={setBulkDeleteOpen}>
+        <DialogContent className="bg-[#12121a] border-white/10 text-white max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="text-red-400 flex items-center gap-2">
+              <AlertCircle className="w-5 h-5" />
+              Delete {selectedIds.length} Candidates
+            </DialogTitle>
+          </DialogHeader>
+          <div className="pt-4">
+            <p className="text-white/70 text-sm">
+              Are you sure you want to delete {selectedIds.length} selected candidates? This action cannot be undone.
+            </p>
+            <div className="flex items-center justify-end gap-3 mt-6">
+              <Button
+                variant="outline"
+                onClick={() => setBulkDeleteOpen(false)}
+                className="border-white/10 text-white hover:bg-white/5 hover:text-white"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleBulkDelete}
+                className="bg-red-500/20 text-red-400 hover:bg-red-500/30 border border-red-500/30"
+              >
+                Delete All
               </Button>
             </div>
           </div>

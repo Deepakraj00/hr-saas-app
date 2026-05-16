@@ -9,23 +9,16 @@ export async function GET() {
     tomorrow.setDate(tomorrow.getDate() + 1);
 
     const [
-      totalCandidates,
-      newCount,
-      inReviewCount,
-      interviewCount,
-      hiredCount,
-      rejectedCount,
+      statusCounts,
       upcomingInterviews,
       recentCandidates,
       todaysInterviews,
       todaysJoinees,
     ] = await Promise.all([
-      prisma.candidate.count(),
-      prisma.candidate.count({ where: { status: "NEW" } }),
-      prisma.candidate.count({ where: { status: "IN_REVIEW" } }),
-      prisma.candidate.count({ where: { status: "INTERVIEW" } }),
-      prisma.candidate.count({ where: { status: "HIRED" } }),
-      prisma.candidate.count({ where: { status: "REJECTED" } }),
+      prisma.candidate.groupBy({
+        by: ['status'],
+        _count: { status: true },
+      }),
       prisma.interview.count({
         where: {
           scheduledAt: { gte: new Date() },
@@ -35,6 +28,7 @@ export async function GET() {
       prisma.candidate.findMany({
         orderBy: { createdAt: "desc" },
         take: 5,
+        select: { id: true, name: true, email: true, status: true, createdAt: true }
       }),
       prisma.candidate.findMany({
         where: {
@@ -50,6 +44,18 @@ export async function GET() {
         select: { id: true, name: true, status: true, email: true },
       }),
     ]);
+
+    const counts = statusCounts.reduce((acc: any, curr) => {
+      acc[curr.status] = curr._count.status;
+      return acc;
+    }, {});
+
+    const totalCandidates = statusCounts.reduce((acc, curr) => acc + curr._count.status, 0);
+    const newCount = counts["NEW"] || 0;
+    const inReviewCount = counts["IN_REVIEW"] || 0;
+    const interviewCount = counts["INTERVIEW"] || 0;
+    const hiredCount = counts["HIRED"] || 0;
+    const rejectedCount = counts["REJECTED"] || 0;
 
     return NextResponse.json({
       stats: {

@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
       data: { status: "INTERVIEW" },
     });
 
-    await pusherServer.trigger(CHANNELS.INTERVIEWS, EVENTS.INTERVIEW_ADDED, interview);
+    pusherServer.trigger(CHANNELS.INTERVIEWS, EVENTS.INTERVIEW_ADDED, interview).catch((err) => console.error('Pusher error:', err));
 
     return NextResponse.json(interview, { status: 201 });
   } catch {

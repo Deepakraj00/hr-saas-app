@@ -42,7 +42,7 @@ export async function PATCH(
       data: dataToUpdate,
     });
 
-    await pusherServer.trigger(CHANNELS.CANDIDATES, EVENTS.CANDIDATE_UPDATED, candidate);
+    pusherServer.trigger(CHANNELS.CANDIDATES, EVENTS.CANDIDATE_UPDATED, candidate).catch((err) => console.error('Pusher error:', err));
 
     return NextResponse.json(candidate);
   } catch {
@@ -59,7 +59,7 @@ export async function DELETE(
   try {
     await prisma.candidate.delete({ where: { id } });
 
-    await pusherServer.trigger(CHANNELS.CANDIDATES, EVENTS.CANDIDATE_DELETED, { id });
+    pusherServer.trigger(CHANNELS.CANDIDATES, EVENTS.CANDIDATE_DELETED, { id }).catch((err) => console.error('Pusher error:', err));
 
     return NextResponse.json({ success: true });
   } catch {

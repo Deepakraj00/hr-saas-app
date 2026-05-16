@@ -48,10 +48,10 @@ export async function POST(req: NextRequest) {
     const skipped = parsed.length - created;
 
     // Trigger real-time refresh
-    await pusherServer.trigger(CHANNELS.CANDIDATES, EVENTS.CANDIDATE_ADDED, {
+    pusherServer.trigger(CHANNELS.CANDIDATES, EVENTS.CANDIDATE_ADDED, {
       bulk: true,
       count: created,
-    });
+    }).catch((err) => console.error('Pusher error:', err));
 
     return NextResponse.json({
       message: `Successfully imported ${created} candidates. ${skipped} skipped (duplicates or errors).`,

@@ -78,7 +78,7 @@ export async function POST(req: NextRequest) {
     });
 
     // Trigger real-time event for collaboration
-    await pusherServer.trigger(CHANNELS.CANDIDATES, EVENTS.CANDIDATE_ADDED, candidate);
+    pusherServer.trigger(CHANNELS.CANDIDATES, EVENTS.CANDIDATE_ADDED, candidate).catch((err) => console.error('Pusher error:', err));
 
     return NextResponse.json(candidate, { status: 201 });
   } catch {
